@@ -8,6 +8,7 @@ a = Analysis(
     datas=[
         ('./res/background.png', '.'),
         ('./res/sprite.png', '.'),
+        ('./res/spike_block.png', '.'),
         ('./res/NotoSansJP-Regular.ttf', '.')
     ],
     hiddenimports=[],

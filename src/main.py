@@ -82,6 +82,7 @@ class PIDScreen:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 36)  # フォントを作成
         self.font_small = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 14)  # フォントを作成
+        self.font_smaller = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 16)  # フォントを作成
         self.pid_angle = 0.0
 
         self.init_sprite()
@@ -108,6 +109,7 @@ class PIDScreen:
     def init_controler(self):
         self.slider_speed = Slider(self.screen, CONTROLER_POSITION_START + 30, 70, 280, 20, min=0, max=100, step=1, initial=0)
         self.slider_gain = Slider(self.screen, CONTROLER_POSITION_START + 30, 170, 280, 20, min=-20, max=20, step=0.1, initial=0)
+        self.spike_block_image = pygame.image.load(resource_path("spike_block.png"))
     
     def refresh_screen(self):
         self.screen.blit(self.background_image, ((WIDTH - CONTROLER_POSITION_START) // (-2), 0))
@@ -126,21 +128,32 @@ class PIDScreen:
         brightness = self.get_brightness()
         sign = " " if self.pid_angle >= 0 else "-"
         text_lines = [
-            ("black", "", f": {BLACK}"),
-            ("white", "", f": {WHITE}"),
+            ("black", None, f": {BLACK}"),
+            ("white", None, f": {WHITE}"),
             ("中間値", "ちゅうかん　ち", f": {(BLACK + WHITE) / 2}"),
             ("反射光", " はん  しゃ  こう", f": {brightness}"),
-            ("中間値ー反射光", "ちゅうかん　ち　ひく　はん  しゃ  こう", f"={brightness - 50}"),
-            ("移動の角度", "　い　どう　　　　かくど", f": {sign}{abs(self.pid_angle / SCALE_FACTOR_GAIN):.1f}")
+            ("中間値ー反射光", "ちゅうかん　ち　ひく　はん  しゃ  こう", f"={brightness - 50}")
         ]
-        y_offset = 320
+        y_offset = 220
         for line, furigana, value in text_lines:
             text_surface = self.font.render(line + value, True, (0, 0, 0))
             self.screen.blit(text_surface, (CONTROLER_POSITION_START + 10, y_offset))
-            furigana_surface = self.font_small.render(furigana, True, (0, 0, 0))
-            self.screen.blit(furigana_surface, (CONTROLER_POSITION_START + 10, y_offset - 8))
-            y_offset += self.font.get_linesize() + 10
-
+            if furigana:
+                furigana_surface = self.font_small.render(furigana, True, (0, 0, 0))
+                self.screen.blit(furigana_surface, (CONTROLER_POSITION_START + 10, y_offset - 8))
+                y_offset += 10
+            y_offset += self.font.get_linesize()
+        
+        self.screen.blit(self.spike_block_image, (CONTROLER_POSITION_START + 10, y_offset))
+        pid_angle_int = round(self.pid_angle / SCALE_FACTOR_GAIN)
+        direction = "直進"
+        if pid_angle_int > 0:
+            direction = "右"
+        elif pid_angle_int < 0:
+            direction = "左"
+        text_surface = self.font_smaller.render(f"{direction}: {pid_angle_int}", True, (0, 0, 0))
+        self.screen.blit(text_surface, (CONTROLER_POSITION_START + 93, y_offset + 124))
+        
     def draw_front_circle(self):
         front_x = self.sprite.rect.centerx + AREA_POSITION * math.cos(math.radians(self.sprite.angle))
         front_y = self.sprite.rect.centery + AREA_POSITION * math.sin(math.radians(self.sprite.angle))
