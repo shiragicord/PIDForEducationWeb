@@ -5,6 +5,7 @@ import math
 import numpy as np
 import sys
 import os
+import asyncio
 
 # 画面のサイズ
 WIDTH, HEIGHT = 1280, 720
@@ -153,7 +154,7 @@ class PIDScreen:
             direction = "左"
         text_surface = self.font_smaller.render(f"{direction}: {pid_angle_int}", True, (0, 0, 0))
         self.screen.blit(text_surface, (CONTROLER_POSITION_START + 93, y_offset + 124))
-        
+
     def draw_front_circle(self):
         front_x = self.sprite.rect.centerx + AREA_POSITION * math.cos(math.radians(self.sprite.angle))
         front_y = self.sprite.rect.centery + AREA_POSITION * math.sin(math.radians(self.sprite.angle))
@@ -274,9 +275,10 @@ class PIDScreen:
         pygame.quit()
 
         
-def main():
+async def main():
     screen = PIDScreen()
     screen.loop()
+    await asyncio.sleep(0)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

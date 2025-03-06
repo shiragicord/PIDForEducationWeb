@@ -77,6 +77,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pygame" },
     { name = "pygame-widgets" },
+    { name = "pygbag" },
     { name = "pyinstaller" },
 ]
 
@@ -85,6 +86,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.2.3" },
     { name = "pygame", specifier = ">=2.6.1" },
     { name = "pygame-widgets", specifier = ">=1.1.7" },
+    { name = "pygbag", specifier = ">=0.9.2" },
     { name = "pyinstaller", specifier = ">=6.12.0" },
 ]
 
@@ -113,6 +115,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/84/c3/aa0035c83ffa2a3f7deda00b2fad135531b8d72b5614b7ffa46dd354732b/pygame_widgets-1.1.7.tar.gz", hash = "sha256:79355283a765c6014272584f9189855a892aa3c46134f91c6cf4983b199effbe", size = 20130 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/77/87/44a1801cd44e37d231fe6fe2ce420f5d9fc1e1857fd2630154d53632285a/pygame_widgets-1.1.7-py3-none-any.whl", hash = "sha256:7deff9be307a8c6dae5b28e7aa872fe890a6c9ccd90bc261b54b8759a65db4f0", size = 27184 },
+]
+
+[[package]]
+name = "pygbag"
+version = "0.9.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5a/27/d6d9cf9c0831481b94606652c0861667d9254aecc59c0f1db0f948a126fe/pygbag-0.9.2.tar.gz", hash = "sha256:0e31860742a8ba9c527135cbb6d64f6d7d8d7b23b71ee87a15f1de9474690c25", size = 152074 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/19/6c4b2a515651849138cef43d878eba9a4f8e39113499a99e7c3d97890c5e/pygbag-0.9.2-py3-none-any.whl", hash = "sha256:3a60a80cc28ed21e3d5d98c08a5d8f857911e38e411b6e590ba640158e8656c1", size = 171937 },
 ]
 
 [[package]]
