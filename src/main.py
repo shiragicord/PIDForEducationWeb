@@ -12,7 +12,7 @@ AREA_SIZE = 50
 AREA_POSITION = 30
 FPS = 30
 FUTURE_ARROW_LENGTH = 150
-CONTROLER_POSITION_START = 960
+CONTROLER_POSITION_START = 940
 SCALE_FACTOR_SPEED = 0.06
 SCALE_FACTOR_GAIN = 0.02
 BLACK = 0
@@ -59,8 +59,8 @@ class PIDSprite(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
             flag_position_changed = True
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
+        if self.rect.right > CONTROLER_POSITION_START:
+            self.rect.right = CONTROLER_POSITION_START
             flag_position_changed = True
         if self.rect.top < 0:
             self.rect.top = 0
@@ -92,7 +92,8 @@ class PIDScreen:
         self.backscreen = self.screen.copy()
 
     def init_sprite(self):
-        self.sprite = PIDSprite(center=(((WIDTH - CONTROLER_POSITION_START) // (-2)), HEIGHT // 2))
+        self.sprite = PIDSprite(center=((CONTROLER_POSITION_START // 2), HEIGHT // 2))
+        self.sprite.rotate(-90)
     
     def rotate_sprite(self, angle):
         self.sprite.rotate(angle)
@@ -105,8 +106,8 @@ class PIDScreen:
         pygame.display.flip()
     
     def init_controler(self):
-        self.slider_speed = Slider(self.screen, CONTROLER_POSITION_START + 30, 70, 260, 20, min=0, max=100, step=1, initial=0)
-        self.slider_gain = Slider(self.screen, CONTROLER_POSITION_START + 30, 170, 260, 20, min=-20, max=20, step=0.1, initial=0)
+        self.slider_speed = Slider(self.screen, CONTROLER_POSITION_START + 30, 70, 280, 20, min=0, max=100, step=1, initial=0)
+        self.slider_gain = Slider(self.screen, CONTROLER_POSITION_START + 30, 170, 280, 20, min=-20, max=20, step=0.1, initial=0)
     
     def refresh_screen(self):
         self.screen.blit(self.background_image, ((WIDTH - CONTROLER_POSITION_START) // (-2), 0))
@@ -129,15 +130,15 @@ class PIDScreen:
             ("white", "", f": {WHITE}"),
             ("中間値", "ちゅうかん　ち", f": {(BLACK + WHITE) / 2}"),
             ("反射光", " はん  しゃ  こう", f": {brightness}"),
-            ("中間値との差", "ちゅうかん　ち　　　　　　  さ", f": {brightness - 50}"),
+            ("中間値ー反射光", "ちゅうかん　ち　ひく　はん  しゃ  こう", f"={brightness - 50}"),
             ("移動の角度", "　い　どう　　　　かくど", f": {sign}{abs(self.pid_angle / SCALE_FACTOR_GAIN):.1f}")
         ]
         y_offset = 320
         for line, furigana, value in text_lines:
             text_surface = self.font.render(line + value, True, (0, 0, 0))
-            self.screen.blit(text_surface, (CONTROLER_POSITION_START + 20, y_offset))
+            self.screen.blit(text_surface, (CONTROLER_POSITION_START + 10, y_offset))
             furigana_surface = self.font_small.render(furigana, True, (0, 0, 0))
-            self.screen.blit(furigana_surface, (CONTROLER_POSITION_START + 20, y_offset - 8))
+            self.screen.blit(furigana_surface, (CONTROLER_POSITION_START + 10, y_offset - 8))
             y_offset += self.font.get_linesize() + 10
 
     def draw_front_circle(self):
