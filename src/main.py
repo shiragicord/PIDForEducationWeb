@@ -1,8 +1,10 @@
 import pygame
-from PIL import Image
+import pygame_widgets
+from pygame_widgets.slider import Slider
+from pygame_widgets.button import Button
+from pygame_widgets.textbox import TextBox
 import math
 import numpy as np
-import flet as ft
 
 # 画面のサイズ
 WIDTH, HEIGHT = 1280, 720
@@ -10,6 +12,9 @@ AREA_SIZE = 50
 AREA_POSITION = 30
 FPS = 30
 FUTURE_ARROW_LENGTH = 150
+CONTROLER_POSITION_START = 960
+SCALE_FACTOR_SPEED = 0.06
+SCALE_FACTOR_GAIN = 0.02
 
 class PIDSprite(pygame.sprite.Sprite):
     def __init__(self, center=(640, 360)):
@@ -17,6 +22,8 @@ class PIDSprite(pygame.sprite.Sprite):
         self.original_image = pygame.image.load("res/sprite.png")
         self.image = self.original_image
         self.rect = self.image.get_rect(center=center)
+        self.x_float = float(self.rect.centerx)
+        self.y_float = float(self.rect.centerx)
         self.angle = 0
 
     def rotate(self, angle):
@@ -29,35 +36,56 @@ class PIDSprite(pygame.sprite.Sprite):
         radian_angle = math.radians(self.angle)
         dx = distance * math.cos(radian_angle)
         dy = distance * math.sin(radian_angle)
-        self.rect.x += dx
-        self.rect.y += dy
+        self.x_float += dx
+        self.y_float += dy
+        self.rect.centerx = round(self.x_float)
+        self.rect.centery = round(self.y_float)
+    
+    def set_position(self, x, y):
+        self.x_float = x
+        self.y_float = y
+        self.rect.centerx = round(self.x_float)
+        self.rect.centery = round(self.y_float)
     
     def update(self):
+        flag_position_changed = False
         if self.rect.left < 0:
             self.rect.left = 0
+            flag_position_changed = True
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
+            flag_position_changed = True
         if self.rect.top < 0:
             self.rect.top = 0
+            flag_position_changed = True
         if self.rect.bottom > HEIGHT:
             self.rect.bottom = HEIGHT
+            flag_position_changed = True
+        
+        if flag_position_changed:
+            self.x_float = self.rect.centerx
+            self.y_float = self.rect.centery
 
 class PIDScreen:
     def __init__(self):
         # 初期化
         pygame.init()
+        pygame.display.set_caption("P制御シミュレーター")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font("C:\Windows\Fonts\meiryo.ttc", 36)  # フォントを作成
+        self.font = pygame.font.Font("res/NotoSansJP-Regular.ttf", 36)  # フォントを作成
+        self.font_small = pygame.font.Font("res/NotoSansJP-Regular.ttf", 14)  # フォントを作成
+        self.pid_angle = 0.0
 
         self.init_sprite()
         self.prepare_screen()
+        self.init_controler()
 
     def backup_screen(self):
         self.backscreen = self.screen.copy()
 
-    def init_sprite(self, center=(640, 360)):
-        self.sprite = PIDSprite(center=center)
+    def init_sprite(self):
+        self.sprite = PIDSprite(center=(((WIDTH - CONTROLER_POSITION_START) // (-2)), HEIGHT // 2))
     
     def rotate_sprite(self, angle):
         self.sprite.rotate(angle)
@@ -65,17 +93,42 @@ class PIDScreen:
 
     def prepare_screen(self):
         self.background_image = pygame.image.load("res/background.png")
-        self.screen.blit(self.background_image, (0, 0))
+        self.screen.blit(self.background_image, ((WIDTH - CONTROLER_POSITION_START) // (-2), 0))
         self.backup_screen()
         pygame.display.flip()
     
+    def init_controler(self):
+        self.slider_speed = Slider(self.screen, CONTROLER_POSITION_START + 30, 70, 260, 20, min=0, max=100, step=1, initial=0)
+        self.slider_gain = Slider(self.screen, CONTROLER_POSITION_START + 30, 170, 260, 20, min=-30, max=30, step=0.1, initial=0)
+    
     def refresh_screen(self):
-        self.screen.blit(self.background_image, (0, 0))
+        self.screen.blit(self.background_image, ((WIDTH - CONTROLER_POSITION_START) // (-2), 0))
         self.screen.blit(self.sprite.image, self.sprite.rect)
         self.draw_front_circle()
-        self.draw_brightness()
         self.draw_future_path()  # 未来の軌跡を描画
-        pygame.display.flip()
+        self.draw_controler()
+    
+    def draw_controler(self):
+        pygame.draw.rect(self.screen, (140, 140, 140), (CONTROLER_POSITION_START, 0, WIDTH - CONTROLER_POSITION_START, HEIGHT))
+        text_surface = self.font.render(f"スピード: {self.slider_speed.getValue()}", True, (0, 0, 0))
+        self.screen.blit(text_surface, (CONTROLER_POSITION_START + 30, 10))
+        text_surface = self.font.render(f"Pゲイン: {self.slider_gain.getValue():.1f}", True, (0, 0, 0))
+        self.screen.blit(text_surface, (CONTROLER_POSITION_START + 30, 100))
+
+        brightness = self.get_brightness()
+        sign = " " if self.pid_angle >= 0 else "-"
+        text_lines = [
+            ("反射光", " はん  しゃ  こう", f": {brightness}"),
+            ("中間値との差", "ちゅうかん　ち　　　　　　  さ", f": {brightness - 50}"),
+            ("移動の角度", "　い　どう　　　　かくど", f": {sign}{abs(self.pid_angle / SCALE_FACTOR_GAIN):.1f}")
+        ]
+        y_offset = 400
+        for line, furigana, value in text_lines:
+            text_surface = self.font.render(line + value, True, (0, 0, 0))
+            self.screen.blit(text_surface, (CONTROLER_POSITION_START + 20, y_offset))
+            furigana_surface = self.font_small.render(furigana, True, (0, 0, 0))
+            self.screen.blit(furigana_surface, (CONTROLER_POSITION_START + 20, y_offset - 8))
+            y_offset += self.font.get_linesize() + 10
 
     def draw_front_circle(self):
         front_x = self.sprite.rect.centerx + AREA_POSITION * math.cos(math.radians(self.sprite.angle))
@@ -125,22 +178,21 @@ class PIDScreen:
         # 明るさを0から100の範囲にスケール
         brightness_percentage = (average_brightness / 255) * 100
         return int(brightness_percentage)
-    
-    def draw_brightness(self):
-        brightness = self.get_brightness()
-        text_surface = self.font.render(f"反射光: {brightness}", True, (0, 0, 0))
-        self.screen.blit(text_surface, (10, 10))
 
     def draw_future_path(self):
         future_path = []
         temp_sprite = PIDSprite(center=self.sprite.rect.center)
         temp_sprite.angle = self.sprite.angle
+        temp_sprite.x_float = self.sprite.x_float
+        temp_sprite.y_float = self.sprite.y_float
 
+        speed = self.slider_speed.getValue() * SCALE_FACTOR_SPEED / 3
+        gain = self.slider_gain.getValue() * SCALE_FACTOR_GAIN
         brightness = self.get_brightness()
         error = 50 - brightness
-        angle = error * 0.1
+        angle = error * gain
         for _ in range(FUTURE_ARROW_LENGTH):  # 未来の100ステップを予測
-            temp_sprite.move_forward(1, angle)
+            temp_sprite.move_forward(speed, angle)
             future_path.append(temp_sprite.rect.center)
 
         if len(future_path) > 1:
@@ -155,6 +207,17 @@ class PIDScreen:
                 (arrow_tip[0] + arrow_size * math.cos(arrow_angle - 2.5), arrow_tip[1] + arrow_size * math.sin(arrow_angle - 2.5))
             ]
             pygame.draw.polygon(self.screen, (255, 0, 0), arrow_points)
+        
+    def on_mouse_click(self, x, y):
+        if x <= CONTROLER_POSITION_START:
+            # マウスクリック位置にスプライトを移動
+            self.sprite.set_position(x, y)
+    
+    def on_key_down(self, key):
+        if key == pygame.K_LEFT:
+            self.sprite.rotate(-10)
+        elif key == pygame.K_RIGHT:
+            self.sprite.rotate(10)
     
     def loop(self):
         running = True
@@ -163,19 +226,23 @@ class PIDScreen:
             self.refresh_screen()
 
             # P制御
+            speed = self.slider_speed.getValue() * SCALE_FACTOR_SPEED
+            gain = self.slider_gain.getValue() * SCALE_FACTOR_GAIN
             brightness = self.get_brightness()
             error = 50 - brightness
-            angle = error * 0.1
-            self.sprite.move_forward(2, angle)
+            self.pid_angle = error * gain
+            self.sprite.move_forward(speed, self.pid_angle)
 
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    # マウスクリック位置にスプライトを移動
-                    mouse_x, mouse_y = event.pos
-                    self.sprite.rect.center = (mouse_x, mouse_y)
+                    self.on_mouse_click(event.pos[0], event.pos[1])
+                elif event.type == pygame.KEYDOWN:
+                    self.on_key_down(event.key)
             
+            pygame_widgets.update(events)
             pygame.display.update()
             self.clock.tick(FPS) 
     
@@ -183,28 +250,9 @@ class PIDScreen:
         pygame.quit()
 
         
-def main(page: ft.Page):
-    global screen, debug_forward_angle
+def main():
     screen = PIDScreen()
-    debug_forward_angle = 0
-
-    page.window.width = 300
-    page.window.height = 300
-
-    def on_slider_change(event: ft.ControlEvent):
-        global debug_forward_angle
-        debug_forward_angle = event.control.value
-
-    slider = ft.Slider(min=-100, max=100, divisions=200, label="{value}")
-    slider.value = 0
-    slider.on_change = on_slider_change
-    page.add(
-        ft.Column([
-            ft.Switch(label="スイッチ", ),
-        ])
-        )
-
     screen.loop()
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    main()
