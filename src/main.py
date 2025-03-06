@@ -1,8 +1,6 @@
 import pygame
 import pygame_widgets
 from pygame_widgets.slider import Slider
-from pygame_widgets.button import Button
-from pygame_widgets.textbox import TextBox
 import math
 import numpy as np
 import sys
@@ -17,6 +15,8 @@ FUTURE_ARROW_LENGTH = 150
 CONTROLER_POSITION_START = 960
 SCALE_FACTOR_SPEED = 0.06
 SCALE_FACTOR_GAIN = 0.02
+BLACK = 0
+WHITE = 100
 
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -125,11 +125,14 @@ class PIDScreen:
         brightness = self.get_brightness()
         sign = " " if self.pid_angle >= 0 else "-"
         text_lines = [
+            ("black", "", f": {BLACK}"),
+            ("white", "", f": {WHITE}"),
+            ("中間値", "ちゅうかん　ち", f": {(BLACK + WHITE) / 2}"),
             ("反射光", " はん  しゃ  こう", f": {brightness}"),
             ("中間値との差", "ちゅうかん　ち　　　　　　  さ", f": {brightness - 50}"),
             ("移動の角度", "　い　どう　　　　かくど", f": {sign}{abs(self.pid_angle / SCALE_FACTOR_GAIN):.1f}")
         ]
-        y_offset = 400
+        y_offset = 320
         for line, furigana, value in text_lines:
             text_surface = self.font.render(line + value, True, (0, 0, 0))
             self.screen.blit(text_surface, (CONTROLER_POSITION_START + 20, y_offset))
@@ -196,7 +199,7 @@ class PIDScreen:
         speed = self.slider_speed.getValue() * SCALE_FACTOR_SPEED / 3
         gain = self.slider_gain.getValue() * SCALE_FACTOR_GAIN
         brightness = self.get_brightness()
-        error = 50 - brightness
+        error = (BLACK + WHITE) // 2 - brightness
         angle = error * gain
         for _ in range(FUTURE_ARROW_LENGTH):  # 未来の100ステップを予測
             temp_sprite.move_forward(speed, angle)
@@ -236,7 +239,7 @@ class PIDScreen:
             speed = self.slider_speed.getValue() * SCALE_FACTOR_SPEED
             gain = self.slider_gain.getValue() * SCALE_FACTOR_GAIN
             brightness = self.get_brightness()
-            error = 50 - brightness
+            error = (BLACK + WHITE) // 2 - brightness
             self.pid_angle = error * gain
             self.sprite.move_forward(speed, self.pid_angle)
 
