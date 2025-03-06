@@ -1,6 +1,5 @@
 dist/main.exe: src/main.py .venv
-    uv run pyinstaller --onefile --noconsole src/main.py
-    cp -r res dist/
+    uv run pyinstaller main.spec
 
 .venv:
     uv sync

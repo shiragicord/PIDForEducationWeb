@@ -5,6 +5,8 @@ from pygame_widgets.button import Button
 from pygame_widgets.textbox import TextBox
 import math
 import numpy as np
+import sys
+import os
 
 # 画面のサイズ
 WIDTH, HEIGHT = 1280, 720
@@ -16,10 +18,15 @@ CONTROLER_POSITION_START = 960
 SCALE_FACTOR_SPEED = 0.06
 SCALE_FACTOR_GAIN = 0.02
 
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("./res/"), relative_path)
+
 class PIDSprite(pygame.sprite.Sprite):
     def __init__(self, center=(640, 360)):
         super().__init__()
-        self.original_image = pygame.image.load("res/sprite.png")
+        self.original_image = pygame.image.load(resource_path("sprite.png"))
         self.image = self.original_image
         self.rect = self.image.get_rect(center=center)
         self.x_float = float(self.rect.centerx)
@@ -73,8 +80,8 @@ class PIDScreen:
         pygame.display.set_caption("P制御シミュレーター")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font("res/NotoSansJP-Regular.ttf", 36)  # フォントを作成
-        self.font_small = pygame.font.Font("res/NotoSansJP-Regular.ttf", 14)  # フォントを作成
+        self.font = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 36)  # フォントを作成
+        self.font_small = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 14)  # フォントを作成
         self.pid_angle = 0.0
 
         self.init_sprite()
@@ -92,14 +99,14 @@ class PIDScreen:
 
 
     def prepare_screen(self):
-        self.background_image = pygame.image.load("res/background.png")
+        self.background_image = pygame.image.load(resource_path("background.png"))
         self.screen.blit(self.background_image, ((WIDTH - CONTROLER_POSITION_START) // (-2), 0))
         self.backup_screen()
         pygame.display.flip()
     
     def init_controler(self):
         self.slider_speed = Slider(self.screen, CONTROLER_POSITION_START + 30, 70, 260, 20, min=0, max=100, step=1, initial=0)
-        self.slider_gain = Slider(self.screen, CONTROLER_POSITION_START + 30, 170, 260, 20, min=-30, max=30, step=0.1, initial=0)
+        self.slider_gain = Slider(self.screen, CONTROLER_POSITION_START + 30, 170, 260, 20, min=-20, max=20, step=0.1, initial=0)
     
     def refresh_screen(self):
         self.screen.blit(self.background_image, ((WIDTH - CONTROLER_POSITION_START) // (-2), 0))

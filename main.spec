@@ -5,7 +5,11 @@ a = Analysis(
     ['src\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('./res/background.png', '.'),
+        ('./res/sprite.png', '.'),
+        ('./res/NotoSansJP-Regular.ttf', '.')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -14,6 +18,7 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
+
 pyz = PYZ(a.pure)
 
 exe = EXE(
@@ -22,7 +27,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='main',
+    name='PIDForEducation',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
