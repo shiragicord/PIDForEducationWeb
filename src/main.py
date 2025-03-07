@@ -244,7 +244,7 @@ class PIDScreen:
         elif key == pygame.K_RIGHT:
             self.sprite.rotate(10)
     
-    def loop(self):
+    async def loop(self):
         running = True
         while running:
             self.sprite.update()  # スプライトの更新
@@ -269,7 +269,8 @@ class PIDScreen:
             
             pygame_widgets.update(events)
             pygame.display.update()
-            self.clock.tick(FPS) 
+            self.clock.tick(FPS)
+            await asyncio.sleep(0)
     
     def destroy(self):
         pygame.quit()
@@ -277,8 +278,7 @@ class PIDScreen:
         
 async def main():
     screen = PIDScreen()
-    screen.loop()
-    await asyncio.sleep(0)
+    await screen.loop()
 
 if __name__ == "__main__":
     asyncio.run(main())
