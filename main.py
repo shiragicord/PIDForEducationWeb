@@ -144,7 +144,7 @@ class PIDScreen:
             ("white", None, f": {WHITE}"),
             ("中間値", "ちゅうかん　ち", f": {(BLACK + WHITE) / 2}"),
             ("反射光", " はん  しゃ  こう", f": {brightness}"),
-            ("中間値ー反射光", "ちゅうかん　ち　ひく　はん  しゃ  こう", f"={brightness - 50}")
+            ("中間値ー反射光", "ちゅうかん　ち　ひく　はん  しゃ  こう", f"={(BLACK + WHITE) / 2 - brightness}")
         ]
         y_offset = 220
         for line, furigana, value in text_lines:
