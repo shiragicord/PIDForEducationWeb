@@ -1,8 +1,9 @@
 import pygame
+import numpy
+
 import pygame_widgets
 from pygame_widgets.slider import Slider
 import math
-import numpy as np
 import sys
 import os
 import asyncio
@@ -169,7 +170,7 @@ class PIDScreen:
         image_array = pygame.surfarray.array3d(front_surface)
 
         # **円形マスクを作成（円の外側を無視する）**
-        mask = np.zeros((AREA_SIZE, AREA_SIZE), dtype=bool)
+        mask = numpy.zeros((AREA_SIZE, AREA_SIZE), dtype=bool)
         cx, cy = AREA_SIZE // 2, AREA_SIZE // 2  # 円の中心
         for y in range(AREA_SIZE):
             for x in range(AREA_SIZE):
@@ -180,7 +181,7 @@ class PIDScreen:
         circle_pixels = image_array[mask]
 
         # **PIL を使って色情報を取得**
-        unique_colors, counts = np.unique(circle_pixels.reshape(-1, 3), axis=0, return_counts=True)
+        unique_colors, counts = numpy.unique(circle_pixels.reshape(-1, 3), axis=0, return_counts=True)
         colors = list(zip([tuple(c) for c in unique_colors], counts))
 
         return colors
