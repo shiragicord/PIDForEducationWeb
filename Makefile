@@ -1,4 +1,4 @@
-dist/main.exe: src/main.py .venv
+dist/main.exe: main.py .venv
     uv run pyinstaller main.spec
 
 .venv:
