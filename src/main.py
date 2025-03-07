@@ -1,6 +1,5 @@
 import pygame
 import numpy
-
 import pygame_widgets
 from pygame_widgets.slider import Slider
 import math
@@ -19,6 +18,9 @@ SCALE_FACTOR_SPEED = 0.06
 SCALE_FACTOR_GAIN = 0.02
 BLACK = 0
 WHITE = 100
+
+def is_running_in_wasm():
+    return sys.platform == "emscripten"
 
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -167,7 +169,19 @@ class PIDScreen:
         front_rect = pygame.Rect(front_x - AREA_SIZE // 2, front_y - AREA_SIZE // 2, AREA_SIZE, AREA_SIZE)
         front_surface = self.backscreen.subsurface(front_rect)
 
-        image_array = pygame.surfarray.array3d(front_surface)
+        if is_running_in_wasm():
+            # If running in pygbag, we need to manually extract pixel data
+            # because pygame.surfarray.array3d is not work well
+            image_array = []
+            for y in range(AREA_SIZE):
+                row = []
+                for x in range(AREA_SIZE):
+                    row.append(front_surface.get_at((x, y))[:3])  # Get RGB values
+                image_array.append(row)
+            # Convert to numpy array
+            image_array = numpy.array(image_array)
+        else:
+            image_array = pygame.surfarray.array3d(front_surface)
 
         # **円形マスクを作成（円の外側を無視する）**
         mask = numpy.zeros((AREA_SIZE, AREA_SIZE), dtype=bool)
