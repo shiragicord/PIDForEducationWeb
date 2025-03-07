@@ -88,6 +88,7 @@ class PIDScreen:
         self.font_small = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 14)  # フォントを作成
         self.font_smaller = pygame.font.Font(resource_path("NotoSansJP-Regular.ttf"), 16)  # フォントを作成
         self.pid_angle = 0.0
+        self.pause = False
 
         self.init_sprite()
         self.prepare_screen()
@@ -120,8 +121,15 @@ class PIDScreen:
         self.screen.blit(self.sprite.image, self.sprite.rect)
         self.draw_front_circle()
         self.draw_future_path()  # 未来の軌跡を描画
+        self.draw_pause_state()
         self.draw_controler()
     
+    def draw_pause_state(self):
+        if self.pause:
+            text_surface = self.font.render("PAUSED", True, (0, 0, 0))
+            self.screen.blit(text_surface, (10, 10))
+
+
     def draw_controler(self):
         pygame.draw.rect(self.screen, (140, 140, 140), (CONTROLER_POSITION_START, 0, WIDTH - CONTROLER_POSITION_START, HEIGHT))
         text_surface = self.font.render(f"スピード: {self.slider_speed.getValue()}", True, (0, 0, 0))
@@ -258,6 +266,8 @@ class PIDScreen:
             self.sprite.rotate(-10)
         elif key == pygame.K_RIGHT:
             self.sprite.rotate(10)
+        elif key == pygame.K_p:
+            self.pause = not self.pause
     
     async def loop(self):
         running = True
@@ -271,7 +281,8 @@ class PIDScreen:
             brightness = self.get_brightness()
             error = (BLACK + WHITE) // 2 - brightness
             self.pid_angle = error * gain
-            self.sprite.move_forward(speed, self.pid_angle)
+            if not self.pause:
+                self.sprite.move_forward(speed, self.pid_angle)
 
             events = pygame.event.get()
             for event in events:
