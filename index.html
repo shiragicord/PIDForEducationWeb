@@ -9,9 +9,12 @@
         body {
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             position: relative;
             margin: 0;
+            font-size: 16pt;
+            width: 100vw;
+            height: 100vh;
+            align-content: center;
         }
 
         canvas {
@@ -22,6 +25,7 @@
 
         #controls,
         #controller-info {
+            width: 300px;
             position: absolute;
             right: 0;
             display: flex;
@@ -39,17 +43,70 @@
 
         #controller-info {
             top: 200px;
-            width: 200px;
             /* Adjust the position to be below controls */
             text-align: left;
         }
 
         .slider-container {
             margin: 10px 0;
+            width: 100%;
         }
 
         .info-line {
             margin: 5px 0;
+        }
+
+        .overlay-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .overlay-container img {
+            width: 100%;
+        }
+
+        .overlay-container .info-line {
+            position: absolute;
+            top: 65%;
+            left: 35%;
+            transform: translate(-50%, -50%);
+            color: black;
+            font-size: 10pt;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            /* スライダーの高さ */
+            background: #ddd;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            /* スライダーのつまみの幅 */
+            height: 25px;
+            /* スライダーのつまみの高さ */
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 25px;
+            /* スライダーのつまみの幅 */
+            height: 25px;
+            /* スライダーのつまみの高さ */
+            background: #4CAF50;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -67,9 +124,46 @@
         </div>
     </div>
     <div id="controller-info">
-        <div class="info-line" id="brightness-info"></div>
-        <div class="info-line" id="error-info"></div>
-        <div class="info-line" id="pid-angle-info"></div>
+        <div class="info-line">black: 0</div>
+        <div class="info-line">white: 100</div>
+        <div class="info-line">
+            <ruby>
+                中間値
+                <rp>(</rp>
+                <rt>ちゅうかんち</rt>
+                <rp>)</rp>
+            </ruby>
+            : 50
+        </div>
+        <div class="info-line">
+            <ruby>
+                反射光
+                <rp>(</rp>
+                <rt>はんしゃこう</rt>
+                <rp>)</rp>
+            </ruby>
+            : <span id="brightness-info"></span>
+        </div>
+        <div class="info-line">
+            <ruby>
+                中間値
+                <rp>(</rp>
+                <rt>ちゅうかんち</rt>
+                <rp>)</rp>
+            </ruby>
+            ー
+            <ruby>
+                反射光
+                <rp>(</rp>
+                <rt>はんしゃこう</rt>
+                <rp>)</rp>
+            </ruby>
+            : <span id="error-info"></span>
+        </div>
+        <div class="overlay-container">
+            <img id="spike-block" src="res/spike_block.png" alt="Spike Block">
+            <div class="info-line" id="pid-angle-info"></div>
+        </div>
     </div>
     <script src="main.js"></script>
 </body>

@@ -184,9 +184,16 @@ function drawControler() {
     const error = (BLACK + WHITE) / 2 - brightness;
     const pidAngle = error * sprite.gain;
 
-    document.getElementById('brightness-info').textContent = `反射光: ${brightness}`;
-    document.getElementById('error-info').textContent = `中間値ー反射光: ${error}`;
-    document.getElementById('pid-angle-info').textContent = `PID角度: ${(pidAngle / SCALE_FACTOR_GAIN).toFixed(1)}`;
+    document.getElementById('brightness-info').textContent = `${brightness}`;
+    document.getElementById('error-info').textContent = `${error}`;
+    let angleText = "直進: "
+    if (pidAngle > 0) {
+        angleText = "右: ";
+    } else if (pidAngle < 0) {
+        angleText = "左: ";
+    }
+
+    document.getElementById('pid-angle-info').textContent = `${angleText}${(pidAngle / SCALE_FACTOR_GAIN).toFixed(1)}`;
 }
 
 function draw() {
@@ -195,6 +202,13 @@ function draw() {
     drawBrightnessArea();
     drawFuturePath();
     drawControler(); // Add this line to update the controller info
+
+    if (sprite.pause) {
+        ctx.font = '48px san-serif';
+        ctx.fillStyle = 'red';
+        ctx.fillText('PAUSED', 10, 50);
+    }
+
     requestAnimationFrame(draw);
 }
 
