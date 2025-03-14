@@ -19,7 +19,7 @@ background_image.src = 'res/background.png';
 const offScreenCanvas = document.createElement('canvas');
 offScreenCanvas.width = WIDTH;
 offScreenCanvas.height = HEIGHT;
-const offScreenCtx = offScreenCanvas.getContext('2d');
+const offScreenCtx = offScreenCanvas.getContext('2d', { willReadFrequently: true });
 
 let sprite = {
     image: new Image(),
