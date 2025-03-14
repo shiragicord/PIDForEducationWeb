@@ -214,7 +214,6 @@ function draw() {
 
 function loop() {
     updateSprite();
-    console.log(getBrightness());
     setTimeout(loop, 1000 / FPS);
 }
 
@@ -233,11 +232,6 @@ document.addEventListener('keydown', (e) => {
         sprite.pause = !sprite.pause;
     }
 });
-
-sprite.image.onload = () => {
-    // drawBackground();
-    backupBackground(); // Add this line to backup the background image data
-};
 
 background_image.onload = () => {
     offScreenCtx.drawImage(background_image, 0, 0); // Draw the background image once
